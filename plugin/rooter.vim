@@ -163,6 +163,7 @@ endfunction
 
 " For third-parties.  Not used by plugin.
 function! FindRootDirectory()
+  return FindCurrentDir()
   let s:fd = expand('%:p')
 
   if empty(s:fd)
@@ -178,6 +179,29 @@ function! FindRootDirectory()
   endif
 
   return s:RootDirectory()
+endfunction
+
+let s:cdir = ""
+let s:finddir = ""
+let s:f = ""
+function! FindCurrentDir()
+  let s:cdir = expand('%:p:h')
+  let s:finddir = s:cdir 
+
+  while !empty(s:finddir)
+    if len(s:finddir) == 3
+      return s:cdir
+    endif
+    for pattern in g:rooter_patterns
+      let s:f = findfile(pattern, s:finddir)
+      if !empty(s:f)
+        return fnamemodify(s:f, ":p:h") 
+      endif
+    endfor
+    let s:finddir .= "\\\\"
+    let s:finddir = fnamemodify(s:finddir, ":p:h:h")
+  endwhile
+  return s:cdir
 endfunction
 
 command! Rooter :call <SID>ChangeToRootDirectory()
